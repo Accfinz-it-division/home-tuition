@@ -4,8 +4,6 @@ import { CourseForm } from "../../course-form";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-export const dynamic = "force-dynamic";
-export const instant = false;
 
 export default async function EditCoursePage({
   params,

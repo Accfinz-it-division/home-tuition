@@ -3,8 +3,7 @@ import Link from "next/link";
 import { TeacherActions } from "./teacher-actions";
 import { Plus, Users, CheckCircle, Clock } from "lucide-react";
 
-export const dynamic = "force-dynamic";
-export const instant = false;
+
 
 export default async function AdminTeachersPage() {
   const [teachers, pendingCount, verifiedCount] = await Promise.all([

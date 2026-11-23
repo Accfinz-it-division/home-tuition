@@ -3,8 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Pencil, BookOpen, User, Award } from "lucide-react";
 
-export const dynamic = "force-dynamic";
-export const instant = false;
+
 
 export default async function CourseDetailPage({
   params,

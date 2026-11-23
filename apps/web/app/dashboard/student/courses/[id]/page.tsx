@@ -14,8 +14,7 @@ import {
   Calendar,
 } from "lucide-react";
 
-export const dynamic = "force-dynamic";
-export const instant = false;
+
 
 export default async function StudentCourseDetailPage({
   params,
