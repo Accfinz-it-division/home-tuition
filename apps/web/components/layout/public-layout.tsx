@@ -1,0 +1,13 @@
+import { Navbar } from "./navbar";
+import { Footer } from "./footer";
+
+// Layout wrapper for all public pages (navbar + content + footer)
+export function PublicLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <main className="flex-1">{children}</main>
+      <Footer />
+    </div>
+  );
+}
