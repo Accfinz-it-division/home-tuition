@@ -2,8 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { UserActions } from "./user-actions";
 import { Users, GraduationCap, UserCheck, Shield } from "lucide-react";
 
-export const instant = false;
-
 export default async function AdminUsersPage() {
   const [users, totalStudents, totalParents, totalTeachers] = await Promise.all([
     prisma.user.findMany({

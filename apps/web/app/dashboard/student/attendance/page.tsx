@@ -11,8 +11,6 @@ import {
 } from "lucide-react";
 
 
-export const instant = false;
-
 export default async function StudentAttendancePage() {
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;

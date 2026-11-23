@@ -3,8 +3,6 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 
-export const instant = false;
-
 export default async function AdminOverview() {
   const [totalUsers, verifiedTeachers, pendingTeachers, totalPayments] =
     await Promise.all([

@@ -4,8 +4,6 @@ import { PaymentActions } from "./payment-actions";
 import { CreditCard, TrendingUp, Clock, CheckCircle } from "lucide-react";
 
 
-export const instant = false;
-
 export default async function AdminPaymentsPage() {
   const [payments, totalPaid, totalPending] = await Promise.all([
     prisma.payment.findMany({

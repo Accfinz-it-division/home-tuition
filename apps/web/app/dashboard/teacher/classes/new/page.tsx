@@ -7,8 +7,6 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 
-export const instant = false;
-
 export default async function NewClassPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;

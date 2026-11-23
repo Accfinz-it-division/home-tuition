@@ -4,8 +4,6 @@ import { CourseActions } from "./course-actions";
 import { Plus, BookOpen } from "lucide-react";
 
 
-export const instant = false;
-
 export default async function AdminCoursesPage() {
   const [courses, totalCourses, totalA, totalO] = await Promise.all([
     prisma.course.findMany({

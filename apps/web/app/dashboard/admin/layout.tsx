@@ -5,8 +5,6 @@ import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 
 
-export const instant = false;
-
 export default async function AdminLayout({
   children,
 }: {

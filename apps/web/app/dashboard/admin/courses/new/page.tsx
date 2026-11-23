@@ -4,8 +4,6 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 
-export const instant = false;
-
 export default async function NewCoursePage() {
   const teachers = await prisma.teacher.findMany({
     where: { status: "VERIFIED" },
