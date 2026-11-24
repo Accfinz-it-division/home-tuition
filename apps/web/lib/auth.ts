@@ -1,6 +1,5 @@
 import { SignJWT, jwtVerify } from "jose";
 import { prisma } from "./prisma";
-import crypto from "crypto";
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
 
@@ -27,9 +26,10 @@ export async function verifyToken(token: string): Promise<JWTPayload | null> {
 
 // Create a session in DB
 export async function createSession(userId: string): Promise<string> {
-  const token = crypto.randomBytes(32).toString("hex");
+  // Use crypto.randomUUID() which works in both Edge and Node.js
+  const token = crypto.randomUUID() + "-" + Date.now().toString(36);
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
-  
+
   await prisma.session.create({
     data: {
       userId,
@@ -37,7 +37,7 @@ export async function createSession(userId: string): Promise<string> {
       expiresAt,
     },
   });
-  
+
   return token;
 }
 
