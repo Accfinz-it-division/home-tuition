@@ -5,7 +5,6 @@ const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
 
 export type JWTPayload = { id: string; role: string; email: string; sessionId?: string };
 
-// Generate a signed JWT token valid for 7 days
 export async function signToken(payload: JWTPayload) {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
@@ -14,7 +13,6 @@ export async function signToken(payload: JWTPayload) {
     .sign(secret);
 }
 
-// Verify JWT token and return payload, or null if invalid
 export async function verifyToken(token: string): Promise<JWTPayload | null> {
   try {
     const { payload } = await jwtVerify(token, secret);
@@ -24,11 +22,10 @@ export async function verifyToken(token: string): Promise<JWTPayload | null> {
   }
 }
 
-// Create a session in DB
 export async function createSession(userId: string): Promise<string> {
-  // Use crypto.randomUUID() which works in both Edge and Node.js
+  // Use Web Crypto API instead of Node crypto
   const token = crypto.randomUUID() + "-" + Date.now().toString(36);
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
   await prisma.session.create({
     data: {
@@ -41,7 +38,6 @@ export async function createSession(userId: string): Promise<string> {
   return token;
 }
 
-// Validate session
 export async function validateSession(token: string) {
   const session = await prisma.session.findUnique({
     where: { token },
@@ -55,7 +51,6 @@ export async function validateSession(token: string) {
   return session;
 }
 
-// Delete session (logout)
 export async function deleteSession(token: string) {
   await prisma.session.deleteMany({ where: { token } });
 }

@@ -49,6 +49,7 @@ model User {
   student       Student?
   parent        Parent?
   notifications Notification[]
+  sessions      Session[]      // ✅ Add this
 }
 
 model Teacher {
@@ -187,4 +188,13 @@ model Mark {
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([examId, studentId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
