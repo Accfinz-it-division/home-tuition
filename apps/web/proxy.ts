@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { verifyToken, validateSession, COOKIE_NAME } from "@/lib/auth";
+import { verifyToken, COOKIE_NAME } from "@/lib/auth";
 
 const roleHome: Record<string, string> = {
   ADMIN: "/dashboard/admin",
@@ -8,7 +8,7 @@ const roleHome: Record<string, string> = {
   PARENT: "/dashboard/parent",
 };
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (pathname.startsWith("/dashboard")) {
@@ -18,13 +18,6 @@ export async function middleware(req: NextRequest) {
     const payload = await verifyToken(token);
     if (!payload) return NextResponse.redirect(new URL("/login", req.url));
 
-    // Validate session in DB
-    if (payload.sessionId) {
-      const session = await validateSession(payload.sessionId);
-      if (!session) return NextResponse.redirect(new URL("/login", req.url));
-    }
-
-    // Role check
     const match = pathname.match(/^\/dashboard\/(\w+)/);
     if (match) {
       const requested = match[1].toUpperCase();
@@ -39,12 +32,7 @@ export async function middleware(req: NextRequest) {
     if (token) {
       const payload = await verifyToken(token);
       if (payload) {
-        if (payload.sessionId) {
-          const session = await validateSession(payload.sessionId);
-          if (session) {
-            return NextResponse.redirect(new URL(roleHome[payload.role], req.url));
-          }
-        }
+        return NextResponse.redirect(new URL(roleHome[payload.role], req.url));
       }
     }
   }
