@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { loginSchema } from "@/lib/validators";
-import { signToken, COOKIE_NAME } from "@/lib/auth";
+import { signToken, createSession, COOKIE_NAME } from "@/lib/auth";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
@@ -16,33 +16,34 @@ export async function POST(req: Request) {
     }
     const { email, password } = parsed.data;
 
-    // Find user by email
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
 
-    // Verify password
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
 
-    // Generate JWT
+    // Create session token
+    const sessionToken = await createSession(user.id);
+
+    // Generate JWT with sessionId
     const token = await signToken({
       id: user.id,
       role: user.role,
       email: user.email,
+      sessionId: sessionToken,
     });
 
-    // Set JWT in httpOnly cookie
     const res = NextResponse.json({ success: true, role: user.role });
     res.cookies.set(COOKIE_NAME, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 60 * 24 * 7,
     });
     return res;
   } catch (err) {

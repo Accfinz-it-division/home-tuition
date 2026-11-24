@@ -4,6 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CreditCard, Loader2 } from "lucide-react";
 
+// Load PayHere SDK globally
+declare global {
+  interface Window {
+    payhere: any;
+  }
+}
+
 export function PayButton({
   courseId,
   courseTitle,
@@ -19,11 +26,10 @@ export function PayButton({
   const [loading, setLoading] = useState(false);
 
   async function handlePay() {
-    if (!confirm(`Pay Rs. ${amount} for ${courseTitle} (${month})?\n\nThis is a demo payment.`)) return;
-    
     setLoading(true);
-    
+
     try {
+      // Call API to create payment + get PayHere config
       const res = await fetch("/api/student/payments/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -33,11 +39,36 @@ export function PayButton({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Payment failed");
 
-      router.refresh();
-      alert("✅ Payment successful! LMS unlocked for this month.");
+      const config = data.payhereConfig;
+
+      // Load PayHere SDK if not loaded
+      if (!window.payhere) {
+        await loadPayHereSDK();
+      }
+
+      // Setup event handlers
+      window.payhere.onCompleted = function (orderId: string) {
+        console.log("Payment completed:", orderId);
+        router.push(`/dashboard/student/payments?success=true&order=${orderId}`);
+        router.refresh();
+      };
+
+      window.payhere.onDismissed = function () {
+        console.log("Payment dismissed");
+        setLoading(false);
+        alert("Payment cancelled.");
+      };
+
+      window.payhere.onError = function (error: string) {
+        console.error("Payment error:", error);
+        setLoading(false);
+        alert("Payment error: " + error);
+      };
+
+      // Start payment
+      window.payhere.startPayment(config);
     } catch (err: any) {
       alert("❌ " + err.message);
-    } finally {
       setLoading(false);
     }
   }
@@ -50,7 +81,7 @@ export function PayButton({
     >
       {loading ? (
         <>
-          <Loader2 size={14} className="animate-spin" /> Processing...
+          <Loader2 size={14} className="animate-spin" /> Loading...
         </>
       ) : (
         <>
@@ -59,4 +90,16 @@ export function PayButton({
       )}
     </button>
   );
+}
+
+// Load PayHere SDK dynamically
+function loadPayHereSDK(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://www.payhere.lk/lib/payhere.js";
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Failed to load PayHere SDK"));
+    document.body.appendChild(script);
+  });
 }
