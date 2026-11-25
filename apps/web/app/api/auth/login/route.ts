@@ -26,10 +26,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
 
-    // Create session token
+    // ✅ Create a unique session in DB
     const sessionToken = await createSession(user.id);
 
-    // Generate JWT with sessionId
+    // ✅ Sign JWT with sessionId
     const token = await signToken({
       id: user.id,
       role: user.role,

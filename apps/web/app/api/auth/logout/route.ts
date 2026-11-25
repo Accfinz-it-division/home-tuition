@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 export async function POST() {
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
-  
+
   if (token) {
     const payload = await verifyToken(token);
     if (payload?.sessionId) {

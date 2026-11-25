@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { verifyToken, COOKIE_NAME } from "@/lib/auth";
+import { verifyToken, validateSession, COOKIE_NAME } from "@/lib/auth";
 
 const roleHome: Record<string, string> = {
   ADMIN: "/dashboard/admin",
@@ -18,6 +18,11 @@ export async function proxy(req: NextRequest) {
     const payload = await verifyToken(token);
     if (!payload) return NextResponse.redirect(new URL("/login", req.url));
 
+    if (payload.sessionId) {
+      const session = await validateSession(payload.sessionId);
+      if (!session) return NextResponse.redirect(new URL("/login", req.url));
+    }
+
     const match = pathname.match(/^\/dashboard\/(\w+)/);
     if (match) {
       const requested = match[1].toUpperCase();
@@ -32,7 +37,12 @@ export async function proxy(req: NextRequest) {
     if (token) {
       const payload = await verifyToken(token);
       if (payload) {
-        return NextResponse.redirect(new URL(roleHome[payload.role], req.url));
+        if (payload.sessionId) {
+          const session = await validateSession(payload.sessionId);
+          if (session) {
+            return NextResponse.redirect(new URL(roleHome[payload.role], req.url));
+          }
+        }
       }
     }
   }
