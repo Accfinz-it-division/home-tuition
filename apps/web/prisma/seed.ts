@@ -7,13 +7,18 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
+  // Clear existing data (optional, careful in production)
+  await prisma.course.deleteMany();
+  await prisma.teacher.deleteMany();
+  await prisma.user.deleteMany();
+
   const password = await bcrypt.hash("password123", 10);
 
-  // Create sample teachers
+  // 1. Create Teachers
   const teacher1 = await prisma.user.create({
     data: {
       name: "Mr. Kamal Perera",
-      email: "kamal@hometuition.lk",
+      email: "kamal@test.com",
       password,
       role: "TEACHER",
       phone: "0771234567",
@@ -32,7 +37,7 @@ async function main() {
   const teacher2 = await prisma.user.create({
     data: {
       name: "Ms. Nimali Silva",
-      email: "nimali@hometuition.lk",
+      email: "nimali@test.com",
       password,
       role: "TEACHER",
       phone: "0779876543",
@@ -48,58 +53,71 @@ async function main() {
     include: { teacher: true },
   });
 
-  // Create sample courses
+  // 2. Create Courses (Using New Enums)
   await prisma.course.createMany({
     data: [
       {
         title: "A/L Combined Maths - 2026",
-        category: "A/L",
+        category: "AL", // ✅ Updated
+        subject: "Combined Maths",
         grade: 12,
-        description: "Complete A/L Combined Maths syllabus covering Pure Maths and Applied Maths. Includes past paper discussions, model papers, and monthly exams.",
+        medium: "SINHALA",
+        description: "Complete A/L Combined Maths syllabus.",
         firstFee: 1500,
         regularFee: 2500,
         teacherId: teacher1.teacher!.id,
       },
       {
         title: "O/L Mathematics - Grade 10",
-        category: "O/L",
+        category: "OL", // ✅ Updated
+        subject: "Mathematics",
         grade: 10,
-        description: "Comprehensive O/L mathematics course with step-by-step theory and problem-solving techniques.",
+        medium: "SINHALA",
+        description: "Comprehensive O/L mathematics course.",
         firstFee: 1000,
         regularFee: 1800,
         teacherId: teacher1.teacher!.id,
       },
       {
         title: "A/L Physics - Theory & Revision",
-        category: "A/L",
+        category: "AL", // ✅ Updated
+        subject: "Physics",
         grade: 12,
-        description: "Complete A/L Physics covering theory, numericals, and revision with past paper discussions.",
+        medium: "ENGLISH",
+        description: "Complete A/L Physics covering theory and revision.",
         firstFee: 1500,
         regularFee: 2500,
         teacherId: teacher2.teacher!.id,
       },
       {
         title: "O/L Science - Grade 11",
-        category: "O/L",
+        category: "OL", // ✅ Updated
+        subject: "Science",
         grade: 11,
-        description: "Full O/L Science syllabus with practical demonstrations and exam-focused revision.",
+        medium: "TAMIL",
+        description: "Full O/L Science syllabus.",
         firstFee: 1200,
         regularFee: 2000,
         teacherId: teacher2.teacher!.id,
       },
       {
         title: "Grade 5 Scholarship - Complete Prep",
-        category: "Scholarship",
+        category: "PRIMARY", // ✅ Updated (Scholarship -> PRIMARY)
+        subject: "General",
         grade: 5,
-        description: "Complete scholarship preparation covering Maths, Environment, Sinhala, and Tamil.",
+        medium: "SINHALA",
+        description: "Complete scholarship preparation.",
         firstFee: 800,
         regularFee: 1500,
         teacherId: teacher1.teacher!.id,
       },
       {
         title: "Spoken English for Beginners",
-        category: "Language",
-        description: "Practical spoken English course focusing on daily conversation, grammar, and confidence.",
+        category: "LANGUAGE", // ✅ Updated
+        subject: "English",
+        grade: null,
+        medium: "ENGLISH",
+        description: "Practical spoken English course.",
         firstFee: 1000,
         regularFee: 1800,
         teacherId: teacher2.teacher!.id,
