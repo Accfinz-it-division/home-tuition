@@ -3,17 +3,39 @@ import Link from "next/link";
 import { CourseActions } from "./course-actions";
 import { Plus, BookOpen } from "lucide-react";
 
+// ✅ Force dynamic rendering
+export const dynamic = "force-dynamic";
+
+// Helper: Category label mapping
+const categoryLabels: Record<string, string> = {
+  PRIMARY: "Primary",
+  SECONDARY: "Secondary",
+  OL: "O/L",
+  AL: "A/L",
+  LANGUAGE: "Language",
+  GOV_EXAM: "Gov Exam",
+  SKILL: "Skill",
+};
 
 export default async function AdminCoursesPage() {
-  const [courses, totalCourses, totalA, totalO] = await Promise.all([
+  // ✅ Fetch all courses + dynamic counts
+  const [courses, totalCourses, categoryCounts] = await Promise.all([
     prisma.course.findMany({
       include: { teacher: { include: { user: true } } },
       orderBy: { createdAt: "desc" },
     }),
     prisma.course.count(),
-    prisma.course.count({ where: { category: "A/L" } }),
-    prisma.course.count({ where: { category: "O/L" } }),
+    prisma.course.groupBy({
+      by: ["category"],
+      _count: true,
+    }),
   ]);
+
+  // Convert category counts to a map for easy lookup
+  const counts: Record<string, number> = {};
+  categoryCounts.forEach((c) => {
+    counts[c.category] = c._count;
+  });
 
   return (
     <div className="space-y-4">
@@ -36,18 +58,22 @@ export default async function AdminCoursesPage() {
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-[#0E2846] p-4 rounded-xl border border-gray-200 dark:border-navy-700">
           <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Total Courses</p>
           <p className="text-2xl font-bold text-[#0A1F37] dark:text-white">{totalCourses}</p>
         </div>
         <div className="bg-white dark:bg-[#0E2846] p-4 rounded-xl border border-gray-200 dark:border-navy-700">
           <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">A/L Courses</p>
-          <p className="text-2xl font-bold text-teal">{totalA}</p>
+          <p className="text-2xl font-bold text-teal">{counts["AL"] || 0}</p>
         </div>
         <div className="bg-white dark:bg-[#0E2846] p-4 rounded-xl border border-gray-200 dark:border-navy-700">
           <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">O/L Courses</p>
-          <p className="text-2xl font-bold text-[#E4B85B]">{totalO}</p>
+          <p className="text-2xl font-bold text-[#E4B85B]">{counts["OL"] || 0}</p>
+        </div>
+        <div className="bg-white dark:bg-[#0E2846] p-4 rounded-xl border border-gray-200 dark:border-navy-700">
+          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Primary Courses</p>
+          <p className="text-2xl font-bold text-[#0A1F37] dark:text-white">{counts["PRIMARY"] || 0}</p>
         </div>
       </div>
 
@@ -93,9 +119,27 @@ export default async function AdminCoursesPage() {
                         <p className="font-semibold text-sm text-[#0A1F37] dark:text-white truncate">
                           {course.title}
                         </p>
-                        <p className="text-xs text-gray-500 truncate">
-                          {course.category} {course.grade ? `• Grade ${course.grade}` : ""}
-                        </p>
+                        {/* ✅ Subject, Category, Medium badges */}
+                        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                          <span className="text-[9px] font-bold uppercase tracking-wider bg-teal/10 text-teal px-1.5 py-0.5 rounded">
+                            {categoryLabels[course.category] || course.category}
+                          </span>
+                          {course.subject && (
+                            <span className="text-[9px] font-bold uppercase tracking-wider bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">
+                              {course.subject}
+                            </span>
+                          )}
+                          {course.medium && (
+                            <span className="text-[9px] font-bold uppercase tracking-wider bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded">
+                              {course.medium}
+                            </span>
+                          )}
+                          {course.grade && (
+                            <span className="text-[9px] font-bold uppercase tracking-wider bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded">
+                              Grade {course.grade}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </td>

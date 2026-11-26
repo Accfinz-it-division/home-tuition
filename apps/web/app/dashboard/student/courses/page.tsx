@@ -14,18 +14,15 @@ export default async function StudentCoursesPage() {
 
   const student = await prisma.student.findUnique({
     where: { userId: payload.id },
+   include: {
+  enrollments: {
+    where: { status: "APPROVED" },  // ✅ Only approved
     include: {
-      enrollments: {
-        include: {
-          course: {
-            include: {
-              teacher: { include: { user: true } },
-            },
-          },
-        },
-        orderBy: { createdAt: "desc" },
-      },
+      course: { include: { teacher: { include: { user: true } } } },
     },
+    orderBy: { createdAt: "desc" },
+  },
+},
   });
 
   if (!student) {

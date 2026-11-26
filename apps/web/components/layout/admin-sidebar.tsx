@@ -9,7 +9,7 @@ import {
   Users,
   CreditCard,
   FileText,
-  FileCheck, // ✅ Exam icon
+  ClipboardList, // ✅ Enrollment icon (Duplicate illa)
   LogOut,
   ExternalLink,
 } from "lucide-react";
@@ -18,9 +18,9 @@ const menuItems = [
   { href: "/dashboard/admin", label: "Overview", icon: LayoutDashboard },
   { href: "/dashboard/admin/teachers", label: "Teacher Verification", icon: GraduationCap },
   { href: "/dashboard/admin/courses", label: "Manage Courses", icon: BookOpen },
-  { href: "/dashboard/admin/students", label: "All Users", icon: Users },
+  { href: "/dashboard/admin/enrollments", label: "Enrollment Requests", icon: ClipboardList }, // ✅ Added
   { href: "/dashboard/admin/payments", label: "Payments", icon: CreditCard },
-  { href: "/dashboard/admin/reports", label: "Reports", icon: FileText },
+  { href: "/dashboard/admin/students", label: "All Users", icon: Users },
 ];
 
 export function AdminSidebar() {

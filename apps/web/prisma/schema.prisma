@@ -6,6 +6,10 @@ datasource db {
   provider = "postgresql"
 }
 
+// ============================================
+// ENUMS
+// ============================================
+
 enum Role {
   ADMIN
   TEACHER
@@ -32,6 +36,35 @@ enum AttendanceStatus {
   LATE
 }
 
+// ✅ NEW: Course Categories
+enum CourseCategory {
+  PRIMARY      // Grade 1-5
+  SECONDARY    // Grade 6-9
+  OL           // Grade 10-11
+  AL           // Grade 12-13
+  LANGUAGE     // Language courses (Spoken English, etc.)
+  GOV_EXAM     // Government exams (Grama Sevaka, etc.)
+  SKILL        // Skill courses (IT, Design, etc.)
+}
+
+// ✅ NEW: Medium of Instruction
+enum Medium {
+  SINHALA
+  TAMIL
+  ENGLISH
+}
+
+// ✅ NEW: Enrollment Status
+enum EnrollmentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ============================================
+// MODELS
+// ============================================
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -49,7 +82,7 @@ model User {
   student       Student?
   parent        Parent?
   notifications Notification[]
-  sessions      Session[]      // ✅ Add this
+  sessions      Session[]
 }
 
 model Teacher {
@@ -72,7 +105,7 @@ model Student {
   enrollments Enrollment[]
   attendances Attendance[]
   payments    Payment[]
-  marks       Mark[]       // ✅ Added for Marks
+  marks       Mark[]
 }
 
 model Parent {
@@ -84,30 +117,33 @@ model Parent {
 }
 
 model Course {
-  id           String        @id @default(cuid())
+  id           String         @id @default(cuid())
   title        String
-  category     String
+  category     CourseCategory
+  subject      String?        // e.g., "Mathematics", "Science"
   grade        Int?
+  medium       Medium?
   description  String?
   thumbnail    String?
-  firstFee     Decimal       @db.Decimal(10, 2)
-  regularFee   Decimal       @db.Decimal(10, 2)
+  firstFee     Decimal        @db.Decimal(10, 2)
+  regularFee   Decimal        @db.Decimal(10, 2)
   teacherId    String
-  teacher      Teacher       @relation(fields: [teacherId], references: [id])
+  teacher      Teacher        @relation(fields: [teacherId], references: [id])
   enrollments  Enrollment[]
   resources    Resource[]
   zoomMeetings ZoomMeeting[]
-  exams        Exam[]        // ✅ Added for Exams
-  createdAt    DateTime      @default(now())
+  exams        Exam[]
+  createdAt    DateTime       @default(now())
 }
 
 model Enrollment {
-  id        String   @id @default(cuid())
+  id        String           @id @default(cuid())
   studentId String
-  student   Student  @relation(fields: [studentId], references: [id])
+  student   Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
   courseId  String
-  course    Course   @relation(fields: [courseId], references: [id])
-  createdAt DateTime @default(now())
+  course    Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  status    EnrollmentStatus @default(PENDING)
+  createdAt DateTime         @default(now())
   @@unique([studentId, courseId])
 }
 
@@ -160,8 +196,7 @@ model ZoomMeeting {
   link         String
   recordingUrl String?
   createdAt    DateTime @default(now())
-
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course       Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 
 model Exam {
@@ -172,9 +207,8 @@ model Exam {
   totalMarks  Int
   description String?
   createdAt   DateTime @default(now())
-
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  marks  Mark[]
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  marks       Mark[]
 }
 
 model Mark {
@@ -183,10 +217,8 @@ model Mark {
   studentId String
   score     Float
   createdAt DateTime @default(now())
-
-  exam    Exam    @relation(fields: [examId], references: [id], onDelete: Cascade)
-  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
-
+  exam      Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   @@unique([examId, studentId])
 }
 

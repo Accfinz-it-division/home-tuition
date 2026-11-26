@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { Button } from "@/components/ui/button";
-import { BookOpen, User, Award, CheckCircle } from "lucide-react";
+import { EnrollButton } from "./enroll-button";
+import { BookOpen, User, Award, CheckCircle, ArrowLeft } from "lucide-react";
 
+export const dynamic = "force-dynamic";
 
 export default async function CourseDetailPage({
   params,
@@ -21,8 +22,11 @@ export default async function CourseDetailPage({
     <div className="min-h-screen bg-white dark:bg-navy-900">
       <section className="bg-navy py-16 px-4">
         <div className="max-w-4xl mx-auto">
-          <Link href="/courses" className="text-teal text-sm mb-4 inline-block hover:underline">
-            ← Back to Courses
+          <Link
+            href="/courses"
+            className="inline-flex items-center gap-1 text-teal text-sm mb-4 hover:underline"
+          >
+            <ArrowLeft size={14} /> Back to Courses
           </Link>
           <div className="flex flex-wrap gap-2 mb-4">
             <span className="bg-teal text-white text-sm font-semibold px-3 py-1 rounded">
@@ -52,7 +56,7 @@ export default async function CourseDetailPage({
                   "Past paper discussions",
                   "Monthly exams with parent reports",
                   "Recorded classes if you miss",
-                  "Full LMS access",
+                  "Full LMS access (notes, papers, quizzes)",
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
                     <CheckCircle size={18} className="text-teal mt-0.5 flex-shrink-0" />
@@ -78,6 +82,9 @@ export default async function CourseDetailPage({
                   </p>
                 </div>
               </div>
+              {course.teacher.bio && (
+                <p className="text-sm text-gray-600 dark:text-gray-300 mt-4">{course.teacher.bio}</p>
+              )}
             </div>
           </div>
 
@@ -94,12 +101,11 @@ export default async function CourseDetailPage({
                   <span className="text-lg font-bold text-navy dark:text-white">Rs. {course.regularFee.toString()}</span>
                 </div>
               </div>
-              <Link href="/register">
-                <Button variant="primary" className="w-full mb-3">
-                  Enroll Now
-                </Button>
-              </Link>
-              <p className="text-xs text-center text-gray-500 dark:text-gray-400">
+
+              {/* ✅ Enroll Button (Client Component) */}
+              <EnrollButton courseId={course.id} courseTitle={course.title} />
+
+              <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-3">
                 Pay once. Get full LMS access + recorded classes.
               </p>
             </div>

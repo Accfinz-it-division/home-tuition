@@ -19,16 +19,21 @@ export async function PATCH(
 
   const { id } = await params;
   const body = await req.json();
-  const { title, category, grade, description, firstFee, regularFee, teacherId } = body;
+  const { title, category, subject, grade, medium, description, firstFee, regularFee, teacherId } = body;
 
   try {
     await prisma.course.update({
       where: { id },
       data: {
-        title, category,
+        title,
+        category,
+        subject: subject || null,
         grade: grade || null,
+        medium: medium || null,
         description: description || null,
-        firstFee, regularFee, teacherId,
+        firstFee,
+        regularFee,
+        teacherId,
       },
     });
     return NextResponse.json({ success: true });

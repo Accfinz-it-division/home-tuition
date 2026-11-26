@@ -17,6 +17,7 @@ export async function POST(req: Request) {
     const { name, email, phone, nic, dob, password, role, parentNic, grade } =
       parsed.data;
 
+    // Minor check
     let isMinor = false;
     if (role === "STUDENT" && dob) {
       const age = new Date().getFullYear() - new Date(dob).getFullYear();
@@ -42,7 +43,8 @@ export async function POST(req: Request) {
 
     const user = await prisma.user.create({
       data: {
-        name, email,
+        name,
+        email,
         phone: phone || null,
         nic: nic || null,
         dob: dob ? new Date(dob) : null,
@@ -65,7 +67,7 @@ export async function POST(req: Request) {
       },
     });
 
-    // ✅ Safe email (won't crash register)
+    // ✅ Send welcome email (safe — won't crash if email fails)
     try {
       await sendWelcomeEmail(user.email, user.name, role);
     } catch (err) {
