@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { GraduationCap, Award } from "lucide-react";
+export const dynamic = "force-dynamic";
 
 export default async function TeachersPage() {
   const teachers = await prisma.teacher.findMany({
